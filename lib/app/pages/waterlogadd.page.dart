@@ -147,7 +147,6 @@ class WaterlogAddPage extends StatelessWidget {
           ],
         ),
       ),
-      // Correct placement of floatingActionButton and floatingActionButtonLocation
       floatingActionButton: SizedBox(
         width: ScreenUtil().setWidth(56),
         height: ScreenUtil().setHeight(56),
@@ -162,7 +161,7 @@ class WaterlogAddPage extends StatelessWidget {
           child: Icon(
             Icons.check,
             color: Colors.white,
-            size: ScreenUtil().setSp(32), // You can adjust the icon size as needed
+            size: ScreenUtil().setSp(32),
           ),
         ),
       ),
@@ -176,7 +175,6 @@ class WaterlogAddPage extends StatelessWidget {
     if (selectedFlower != null) {
       String flowerName = selectedFlower.name;
 
-      // Используем DateFormat для форматирования даты
       DateTime lastWateringDate = DateFormat('dd.MM.yyyy').parse(lastWateringController.text);
       int wateringFrequency = int.parse(wateringFrequencyController.text);
 
@@ -192,7 +190,7 @@ class WaterlogAddPage extends StatelessWidget {
         context,
         MaterialPageRoute(
           builder: (context) => WateringSchedulePage(
-            flowerId: selectedFlower.id,  // Передаем id выбранного цветка
+            flowerId: selectedFlower.id,
             flowerName: flowerName,
             imageUrl: selectedFlower.imageUrl,
             lastWateringDate: lastWateringDate,
@@ -269,7 +267,7 @@ class _YourFlowersDropdownState extends State<YourFlowersDropdown> {
                                   height: ScreenUtil().setHeight(30),
                                 )
                                     : Image.asset(
-                                  'assets/placeholder_image.png', // Placeholder image path
+                                  'assets/placeholder_image.png',
                                   fit: BoxFit.cover,
                                   width: ScreenUtil().setWidth(30),
                                   height: ScreenUtil().setHeight(30),
@@ -345,7 +343,7 @@ class _YourFlowersDropdownState extends State<YourFlowersDropdown> {
                           height: ScreenUtil().setHeight(30),
                         )
                             : Image.asset(
-                          'assets/placeholder_image.png', // Placeholder image path
+                          'assets/placeholder_image.png',
                           fit: BoxFit.cover,
                           width: ScreenUtil().setWidth(30),
                           height: ScreenUtil().setHeight(30),

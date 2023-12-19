@@ -83,7 +83,7 @@ class WaterlogPage extends StatelessWidget {
                       children: [
                         ListTile(
                           title: Padding(
-                            padding: EdgeInsets.only(top: 10.h), // Добавлен отступ в 20 пикселей от верхней границы
+                            padding: EdgeInsets.only(top: 10.h),
                             child: Text(
                               lastRecord.flowerName,
                               style: TextStyle(

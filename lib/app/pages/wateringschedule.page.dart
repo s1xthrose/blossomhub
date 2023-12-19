@@ -24,14 +24,14 @@ class FlowerData {
   String flowerName;
   DateTime lastWateringDate;
   int wateringFrequencyInDays;
-  String imageUrl; // Add this line
+  String imageUrl;
 
   FlowerData({
     required this.flowerId,
     required this.flowerName,
     required this.lastWateringDate,
     required this.wateringFrequencyInDays,
-    required this.imageUrl, // Add this line
+    required this.imageUrl,
   });
 }
 
@@ -45,7 +45,7 @@ class WateringSchedulePage extends StatefulWidget {
   const WateringSchedulePage({super.key, 
     required this.flowerId,
     required this.flowerName,
-    required this.imageUrl,  // Добавьте эту строку
+    required this.imageUrl,
     required this.lastWateringDate,
     required this.wateringFrequencyInDays,
   });
@@ -199,7 +199,7 @@ class _WateringSchedulePageState extends State<WateringSchedulePage> {
                       height: ScreenUtil().setHeight(100),
                     )
                         : Image.asset(
-                      'assets/placeholder_image.png', // Placeholder image path
+                      'assets/placeholder_image.png',
                       fit: BoxFit.cover,
                       width: ScreenUtil().setWidth(100),
                       height: ScreenUtil().setHeight(100),
