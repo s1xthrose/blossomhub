@@ -16,7 +16,7 @@ class Flower {
   final String description;
   final String imageUrl;
   final String notes;
-  final String id; // Add an 'id' property
+  final String id;
 
   Flower({
     required this.name,

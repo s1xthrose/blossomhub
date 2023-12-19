@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'wateringschedule.page.dart';
 import 'waterlogadd.page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class WaterlogPage extends StatelessWidget {
   const WaterlogPage({Key? key});
@@ -11,6 +13,9 @@ class WaterlogPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: const Size(393, 873));
+
+    // Вызываем метод загрузки записей при построении виджета
+    _loadWateringRecords(context);
 
     return Scaffold(
       backgroundColor: const Color.fromRGBO(235, 255, 240, 1),
@@ -45,10 +50,12 @@ class WaterlogPage extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final flowerId =
                   wateringProvider.wateringRecords.keys.elementAt(index);
-                  final records = wateringProvider.wateringRecords[flowerId]!;
+                  final records =
+                  wateringProvider.wateringRecords[flowerId]!;
                   final lastRecord = records.last;
 
-                  DateTime nextWateringDate = lastRecord.lastWateringDate.add(
+                  DateTime nextWateringDate =
+                  lastRecord.lastWateringDate.add(
                     Duration(days: lastRecord.wateringFrequencyInDays),
                   );
                   int daysSinceLastWatering =
@@ -83,7 +90,7 @@ class WaterlogPage extends StatelessWidget {
                       children: [
                         ListTile(
                           title: Padding(
-                            padding: EdgeInsets.only(top: 10.h), // Добавлен отступ в 20 пикселей от верхней границы
+                            padding: EdgeInsets.only(top: 10.h),
                             child: Text(
                               lastRecord.flowerName,
                               style: TextStyle(
@@ -189,5 +196,25 @@ class WaterlogPage extends StatelessWidget {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
+  }
+
+  // Метод для загрузки записей полива из SharedPreferences
+  _loadWateringRecords(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String recordsJson = prefs.getString('wateringRecords') ?? '[]';
+    List<dynamic> recordsList = json.decode(recordsJson);
+    Map<String, List<FlowerData>> loadedRecords = {};
+    recordsList.forEach((record) {
+      String flowerId = record['flowerId'];
+      List<dynamic> recordsData = record['records'];
+      List<FlowerData> records =
+      recordsData.map((data) => FlowerData.fromJson(data)).toList();
+      loadedRecords[flowerId] = records;
+    });
+
+    // Обновляем данные в провайдере только если есть загруженные записи
+    if (loadedRecords.isNotEmpty) {
+      context.read<WateringProvider>().wateringRecords = loadedRecords;
+    }
   }
 }
