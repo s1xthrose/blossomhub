@@ -7,15 +7,24 @@ import 'waterlogadd.page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
-class WaterlogPage extends StatelessWidget {
+class WaterlogPage extends StatefulWidget {
   const WaterlogPage({Key? key});
+
+  @override
+  _WaterlogPageState createState() => _WaterlogPageState();
+}
+
+class _WaterlogPageState extends State<WaterlogPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Вызываем метод загрузки записей при создании состояния виджета
+    _loadWateringRecords(context);
+  }
 
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context, designSize: const Size(393, 873));
-
-    // Вызываем метод загрузки записей при построении виджета
-    _loadWateringRecords(context);
 
     return Scaffold(
       backgroundColor: const Color.fromRGBO(235, 255, 240, 1),
@@ -54,14 +63,22 @@ class WaterlogPage extends StatelessWidget {
                   wateringProvider.wateringRecords[flowerId]!;
                   final lastRecord = records.last;
 
+                  print('Flower ID: $flowerId');
+                  print('Last Record: $lastRecord');
+
                   DateTime nextWateringDate =
                   lastRecord.lastWateringDate.add(
                     Duration(days: lastRecord.wateringFrequencyInDays),
                   );
                   int daysSinceLastWatering =
-                      DateTime.now().difference(lastRecord.lastWateringDate).inDays;
+                      DateTime
+                          .now()
+                          .difference(lastRecord.lastWateringDate)
+                          .inDays;
                   int daysUntilNextWatering =
-                      nextWateringDate.difference(DateTime.now()).inDays;
+                      nextWateringDate
+                          .difference(DateTime.now())
+                          .inDays;
 
                   Color borderColor =
                   daysSinceLastWatering > lastRecord.wateringFrequencyInDays
@@ -103,7 +120,8 @@ class WaterlogPage extends StatelessWidget {
                             children: [
                               Row(
                                 children: [
-                                  if (daysSinceLastWatering <= lastRecord.wateringFrequencyInDays)
+                                  if (daysSinceLastWatering <=
+                                      lastRecord.wateringFrequencyInDays)
                                     Text(
                                       'Last watering $daysSinceLastWatering days ago. ',
                                       style: GoogleFonts.nunito(
@@ -114,7 +132,8 @@ class WaterlogPage extends StatelessWidget {
                                       ),
                                     ),
                                   Text(
-                                    'Next one in ${daysUntilNextWatering.abs()} days',
+                                    'Next one in ${daysUntilNextWatering
+                                        .abs()} days',
                                     style: GoogleFonts.nunito(
                                       fontSize: 14.0,
                                       fontWeight: FontWeight.w600,
@@ -130,14 +149,16 @@ class WaterlogPage extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => WateringSchedulePage(
-                                  flowerId: flowerId,
-                                  flowerName: lastRecord.flowerName,
-                                  imageUrl: lastRecord.imageUrl,
-                                  lastWateringDate: lastRecord.lastWateringDate,
-                                  wateringFrequencyInDays:
-                                  lastRecord.wateringFrequencyInDays,
-                                ),
+                                builder: (context) =>
+                                    WateringSchedulePage(
+                                      flowerId: flowerId,
+                                      flowerName: lastRecord.flowerName,
+                                      imageUrl: lastRecord.imageUrl,
+                                      lastWateringDate: lastRecord
+                                          .lastWateringDate,
+                                      wateringFrequencyInDays:
+                                      lastRecord.wateringFrequencyInDays,
+                                    ),
                               ),
                             );
                           },
@@ -214,7 +235,42 @@ class WaterlogPage extends StatelessWidget {
 
     // Обновляем данные в провайдере только если есть загруженные записи
     if (loadedRecords.isNotEmpty) {
-      context.read<WateringProvider>().wateringRecords = loadedRecords;
+      context
+          .read<WateringProvider>()
+          .wateringRecords = loadedRecords;
     }
+  }
+
+  // Метод для сохранения записей полива в SharedPreferences
+  _saveWateringRecords(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Получаем записи о поливе из провайдера
+    Map<String, List<FlowerData>> records =
+        context
+            .read<WateringProvider>()
+            .wateringRecords;
+
+    // Преобразуем записи о поливе в формат, подходящий для сохранения
+    List<Map<String, dynamic>> recordsList = [];
+    records.forEach((flowerId, recordsData) {
+      List<Map<String, dynamic>> data = recordsData.map((record) =>
+          record.toJson()).toList();
+      recordsList.add({
+        'flowerId': flowerId,
+        'records': data,
+      });
+    });
+
+    // Сохраняем записи в SharedPreferences
+    String recordsJson = json.encode(recordsList);
+    prefs.setString('wateringRecords', recordsJson);
+  }
+
+  // Вызываем метод сохранения записей при выходе из виджета
+  @override
+  void dispose() {
+    _saveWateringRecords(context);
+    super.dispose();
   }
 }
