@@ -8,19 +8,21 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class WaterlogPage extends StatefulWidget {
-  const WaterlogPage({Key? key});
+  const WaterlogPage({Key? key}) : super(key: key);
 
   @override
   _WaterlogPageState createState() => _WaterlogPageState();
 }
 
 class _WaterlogPageState extends State<WaterlogPage> {
+  final GlobalKey<_WaterlogPageState> _key = GlobalKey<_WaterlogPageState>();
+
   @override
   void initState() {
     super.initState();
-    // Вызываем метод загрузки записей при создании состояния виджета
-    _loadWateringRecords(context);
+    _loadWateringRecords(_key);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -220,7 +222,7 @@ class _WaterlogPageState extends State<WaterlogPage> {
   }
 
   // Метод для загрузки записей полива из SharedPreferences
-  _loadWateringRecords(BuildContext context) async {
+  _loadWateringRecords(GlobalKey<_WaterlogPageState> key) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String recordsJson = prefs.getString('wateringRecords') ?? '[]';
     List<dynamic> recordsList = json.decode(recordsJson);
@@ -233,44 +235,36 @@ class _WaterlogPageState extends State<WaterlogPage> {
       loadedRecords[flowerId] = records;
     });
 
-    // Обновляем данные в провайдере только если есть загруженные записи
     if (loadedRecords.isNotEmpty) {
-      context
-          .read<WateringProvider>()
-          .wateringRecords = loadedRecords;
+      // Access the ancestor widget using the key
+      key.currentState?.context.read<WateringProvider>().wateringRecords = loadedRecords;
     }
   }
 
-  // Метод для сохранения записей полива в SharedPreferences
-  _saveWateringRecords(BuildContext context) async {
+  _saveWateringRecords(GlobalKey<_WaterlogPageState> key) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    // Получаем записи о поливе из провайдера
     Map<String, List<FlowerData>> records =
-        context
-            .read<WateringProvider>()
-            .wateringRecords;
+        key.currentState?.context.read<WateringProvider>().wateringRecords ?? {};
 
-    // Преобразуем записи о поливе в формат, подходящий для сохранения
     List<Map<String, dynamic>> recordsList = [];
     records.forEach((flowerId, recordsData) {
-      List<Map<String, dynamic>> data = recordsData.map((record) =>
-          record.toJson()).toList();
+      List<Map<String, dynamic>> data =
+      recordsData.map((record) => record.toJson()).toList();
       recordsList.add({
         'flowerId': flowerId,
         'records': data,
       });
     });
 
-    // Сохраняем записи в SharedPreferences
     String recordsJson = json.encode(recordsList);
     prefs.setString('wateringRecords', recordsJson);
   }
 
-  // Вызываем метод сохранения записей при выходе из виджета
   @override
   void dispose() {
-    _saveWateringRecords(context);
+    // Use the key to access methods or properties of the ancestor widget
+    _saveWateringRecords(_key);
     super.dispose();
   }
 }
