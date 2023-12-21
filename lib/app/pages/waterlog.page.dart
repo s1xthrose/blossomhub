@@ -221,12 +221,15 @@ class _WaterlogPageState extends State<WaterlogPage> {
     );
   }
 
-  // Метод для загрузки записей полива из SharedPreferences
+// Метод для загрузки записей полива из SharedPreferences
   _loadWateringRecords(GlobalKey<_WaterlogPageState> key) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String recordsJson = prefs.getString('wateringRecords') ?? '[]';
     List<dynamic> recordsList = json.decode(recordsJson);
     Map<String, List<FlowerData>> loadedRecords = {};
+
+    print('Loading watering records from SharedPreferences:');
+
     recordsList.forEach((record) {
       String flowerId = record['flowerId'];
       List<dynamic> recordsData = record['records'];
@@ -238,6 +241,8 @@ class _WaterlogPageState extends State<WaterlogPage> {
     if (loadedRecords.isNotEmpty) {
       // Access the ancestor widget using the key
       key.currentState?.context.read<WateringProvider>().wateringRecords = loadedRecords;
+    } else {
+      print('No watering records found in SharedPreferences.');
     }
   }
 
@@ -259,11 +264,13 @@ class _WaterlogPageState extends State<WaterlogPage> {
 
     String recordsJson = json.encode(recordsList);
     prefs.setString('wateringRecords', recordsJson);
+
+    print('Watering records saved to SharedPreferences:');
+    print(recordsJson);
   }
 
   @override
   void dispose() {
-    // Use the key to access methods or properties of the ancestor widget
     _saveWateringRecords(_key);
     super.dispose();
   }
