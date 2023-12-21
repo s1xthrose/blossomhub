@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -92,6 +93,15 @@ class _WateringSchedulePageState extends State<WateringSchedulePage> {
       _lastWateringDate =
           DateTime.parse(prefs.getString('lastWateringDate$_flowerId') ??
               widget.lastWateringDate.toString());
+
+      // Загрузка всего списка полива для текущего цветка
+      String recordsJson = prefs.getString('wateringRecords$_flowerId') ?? '[]';
+      List<dynamic> recordsList = json.decode(recordsJson);
+      List<FlowerData> records =
+      recordsList.map((data) => FlowerData.fromJson(data)).toList();
+
+      wateringProvider.wateringRecords[_flowerId] = records;
+
       wateringProvider.addOrUpdateRecord(FlowerData(
         flowerId: _flowerId,
         flowerName: widget.flowerName,
@@ -105,6 +115,12 @@ class _WateringSchedulePageState extends State<WateringSchedulePage> {
   _saveData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setString('lastWateringDate$_flowerId', _lastWateringDate.toString());
+
+    // Сохранение всего списка полива для текущего цветка
+    List<Map<String, dynamic>> recordsList = wateringProvider.wateringRecords[_flowerId]!
+        .map((record) => record.toJson())
+        .toList();
+    prefs.setString('wateringRecords$_flowerId', json.encode(recordsList));
   }
 
   @override
